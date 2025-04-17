@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:latest
+    container_name: kong_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: ["redis-server", "--appendonly", "yes"]
+    networks:
+      - kong-network
+  mysql:
+    image: mysql:8.0
+    container_name: kong_mysql
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: kong_db
+    restart: always
+
+#  backend:
+#    build: .
+#    container_name: kong_backend
+#    depends_on:
+#      - redis
+#    ports:
+#      - "8080:8080"
+#    networks:
+#      - kong-network
+#    command: ["java", "-jar", "kong_back.jar"]
+#    working_dir: /app
+
+volumes:
+  redis_data:
+
+networks:
+  kong-network:
+    driver: bridge

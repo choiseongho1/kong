@@ -1,0 +1,39 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/kong_db
+    username: root
+    password: 1234
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQL8Dialect
+  ai:
+    openai:
+      api-key: {OPEN_AI}
+      model: "gpt-4o-mini"
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      timeout: 10000
+
+jwt:
+  secret: CJQ/O+LTpXHjBnaoDj9Feni1dtHWNMU6I1nHYywa+HA=
+  access-token-expiration: 3600000
+  refresh-token-expiration: 1209600000
+
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html

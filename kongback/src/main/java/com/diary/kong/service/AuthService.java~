@@ -1,0 +1,75 @@
+package com.diary.kong.service;
+
+import com.diary.kong.common.CustomException;
+import com.diary.kong.dto.LoginResponseDto;
+import com.diary.kong.dto.UserDetailDto;
+import com.diary.kong.security.TokenResponse;
+import com.diary.kong.dto.UserLoginDto;
+import com.diary.kong.model.User;
+import com.diary.kong.repository.UserRepository;
+import com.diary.kong.security.JwtTokenProvider;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Service;
+
+@Service
+public class AuthService {
+
+    private final UserRepository userRepository;
+    private final BCryptPasswordEncoder passwordEncoder;
+    private final JwtTokenProvider jwtTokenProvider;
+    private final RedisTemplate<String, String> redisTemplate;
+
+    public AuthService(UserRepository userRepository, JwtTokenProvider jwtTokenProvider, RedisTemplate<String, String> redisTemplate) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = new BCryptPasswordEncoder();
+        this.jwtTokenProvider = jwtTokenProvider;
+        this.redisTemplate = redisTemplate;
+    }
+
+    public LoginResponseDto login(UserLoginDto userLoginDto) {
+        User user = userRepository.findByEmail(userLoginDto.getEmail())
+            .orElseThrow(() -> new CustomException(401, "이메일 또는 비밀번호가 올바르지 않습니다."));
+
+        if (!passwordEncoder.matches(userLoginDto.getPassword(), user.getPassword())) {
+            throw new CustomException(401, "이메일 또는 비밀번호가 올바르지 않습니다.");
+        }
+
+        TokenResponse tokens = jwtTokenProvider.createToken(user.getEmail());
+
+        UserDetailDto userDetailDto = UserDetailDto.builder()
+            .id(user.getId())
+            .email(user.getEmail())
+            .nickname(user.getNickname())
+            .build();
+
+        LoginResponseDto loginResponseDto = LoginResponseDto.builder()
+            .accessToken(tokens.getAccessToken())
+            .refreshToken(tokens.getRefreshToken())
+            .user(userDetailDto)
+            .build();
+
+        return loginResponseDto;
+    }
+
+    public TokenResponse refreshAccessToken(String refreshToken) {
+//        if (!jwtTokenProvider.validateToken(refreshToken)) {
+//            throw new CustomException(401, "유효하지 않은 Refresh Token입니다.");
+//        }
+
+        String email = jwtTokenProvider.getEmail(refreshToken);
+        String storedToken = redisTemplate.opsForValue().get("RT:" + email);
+
+        if (storedToken == null || !storedToken.equals(refreshToken)) {
+            throw new CustomException(401, "유효하지 않은 Refresh Token입니다.");
+        }
+
+        TokenResponse newTokens = jwtTokenProvider.refreshToken(refreshToken);
+
+        return newTokens;
+    }
+
+    public void logout(String email) {
+        jwtTokenProvider.logout(email);
+    }
+}

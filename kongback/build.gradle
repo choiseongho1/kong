@@ -1,0 +1,81 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.4.2'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com.diary'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Spring Boot 기본 스타터
+    implementation 'org.springframework.boot:spring-boot-starter'
+
+    // REST API 개발을 위한 Web Starter
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    // Spring Data JPA (DB 연동)
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+    // Spring Security (JWT 인증)
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+
+    // 입력값 검증을 위한 Validation Starter
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    // Spring AI (OpenAI 기반 감정 분석)
+    implementation 'org.springframework.ai:spring-ai-openai-spring-boot-starter:1.0.0-M5'
+
+    // 개발용 H2 데이터베이스 (테스트 환경)
+    runtimeOnly 'com.h2database:h2'
+
+    // Swagger (OpenAPI 3)
+    implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.8.4'
+
+
+    // Lombok (자동 생성)
+    implementation 'org.projectlombok:lombok:1.18.30'
+    annotationProcessor 'org.projectlombok:lombok:1.18.30'
+
+    // 테스트 관련 의존성
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    // HATEOAS
+    implementation 'org.springframework.boot:spring-boot-starter-hateoas'
+
+    // JWT (JJWT) 라이브러리
+    implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5' // JSON 처리용
+
+    // Redis 의존성 추가
+    implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation 'org.apache.commons:commons-pool2' // Redis 커넥션 풀 관리
+
+
+    // MySQL 관련 dependency
+    implementation group: 'mysql', name: 'mysql-connector-java', version: '8.0.33'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+bootJar {
+    archiveBaseName = 'kong_back'
+    archiveVersion = ''
+    archiveClassifier = ''
+    mainClass = 'com.diary.kong.KongBackApplication'
+}
